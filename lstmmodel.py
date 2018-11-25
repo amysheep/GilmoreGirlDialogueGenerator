@@ -9,7 +9,7 @@ import numpy as np
 import tensorflow as tf
 
 data = []
-with open('/scrape/script.jl') as f:
+with open('./scrape/script.jl') as f:
     for line in f:
         data.append(json.loads(line))
         
@@ -70,7 +70,7 @@ import sys
 import io
 
 model = Sequential()
-model.add(LSTM(1280, input_shape=(maxlen, len(chars))))
+model.add(LSTM(128, input_shape=(maxlen, len(chars))))
 model.add(Dense(len(chars)))
 model.add(Activation('softmax'))
 
@@ -140,3 +140,10 @@ with tf.device('/gpu:0'):
               epochs=15,
               verbose=2,
               callbacks=[generate_text, checkpoint])
+
+from keras.models import model_from_json
+# save model 
+model_json = model.to_json()
+with open("model.json","w") as json_file:
+    json_file.write(model_json)
+
