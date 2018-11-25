@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 LSTM model training
@@ -9,7 +10,7 @@ import numpy as np
 import tensorflow as tf
 
 data = []
-with open('./scrape/script.jl') as f:
+with open('scrape/script.jl') as f:
     for line in f:
         data.append(json.loads(line))
         
@@ -25,13 +26,11 @@ roryline = rory.line
 n_messages = len(roryline)
 n_chars = len(' '.join(map(str, roryline)))
 
-print("rory accounts for %d messages" % n_messages)
-print("her messages add up to %d characters" % n_chars)
+print("rory accounts for {} messages".format(n_messages))
+print("her messages add up to {} characters".format(n_chars))
 
 
 roryline = ' '.join(map(str, roryline)).lower()
-
-roryline[:100] # Show first 100 characters
 
 chars = sorted(list(set(roryline)))
 print('Count of unique characters (i.e., features):', len(chars))
@@ -134,7 +133,7 @@ checkpoint = ModelCheckpoint(filepath,
                              mode='min')
 
 # fit model using our gpu
-with tf.device('/gpu:0'):
+with tf.device('/cpu:0'):
     model.fit(x, y,
               batch_size=128,
               epochs=15,
