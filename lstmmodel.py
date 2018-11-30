@@ -10,7 +10,7 @@ import numpy as np
 import tensorflow as tf
 
 data = []
-with open('scrape/script.jl') as f:
+with open('./scrape/script.jl') as f:
     for line in f:
         data.append(json.loads(line))
         
@@ -36,7 +36,7 @@ chars = sorted(list(set(roryline)))
 print('Count of unique characters (i.e., features):', len(chars))
 char_indices = dict((c, i) for i, c in enumerate(chars))
 indices_char = dict((i, c) for i, c in enumerate(chars))
-        
+
 maxlen = 40
 step = 3
 sentences = []
@@ -56,6 +56,9 @@ for i, sentence in enumerate(sentences):
     for t, char in enumerate(sentence):
         x[i, t, char_indices[char]] = 1
     y[i, char_indices[next_chars[i]]] = 1
+    
+    
+
     
 ############ PART II MODELING####################
 
@@ -133,16 +136,16 @@ checkpoint = ModelCheckpoint(filepath,
                              mode='min')
 
 # fit model using our gpu
-with tf.device('/cpu:0'):
+with tf.device('/gpu:0'):
     model.fit(x, y,
               batch_size=128,
               epochs=15,
               verbose=2,
               callbacks=[generate_text, checkpoint])
 
-from keras.models import model_from_json
-# save model 
-model_json = model.to_json()
-with open("model.json","w") as json_file:
-    json_file.write(model_json)
+#from keras.models import model_from_json
+## save model 
+#model_json = model.to_json()
+#with open("model.json","w") as json_file:
+#    json_file.write(model_json)
 
