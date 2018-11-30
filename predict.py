@@ -6,17 +6,41 @@ Created on Mon Nov 26 11:07:23 2018
 @author: ayang
 """
 
+
+from keras.models import Sequential
+from keras.layers import Dense, Activation
+from keras.layers import LSTM
+
+
+
+# define model 
+
+
+#def create_model():
+#   model = Sequential()
+#   model.add(LSTM(128, input_shape=(maxlen, len(chars))))
+#   model.add(Dense(len(chars)))
+#   model.add(Activation('softmax'))
+#   return model
+
+
+
 #from keras.models import save_model as save_keras_model
 from keras.models import load_model
-#save_keras_model(self.model, os.path.join(saving_staging_directory, 'model.hdf5'))
-model = load_model("weights.hdf5")
-
-
-
 import json
 import pandas as pd
 import numpy as np
 import sys
+#save_keras_model(self.model, os.path.join(saving_staging_directory, 'model.hdf5'))
+#model = create_model()
+actor = input("Rory or Lorelai?")
+if actor == 'Rory':
+    model = load_model("weights.hdf5")
+else: model = load_model("weights_lorelai.hdf5")
+
+
+
+
 
 
 #from lstmmodel.sample import sample
@@ -53,14 +77,14 @@ n_chars = len(' '.join(map(str, roryline)))
 roryline = ' '.join(map(str, roryline)).lower()
 
 chars = sorted(list(set(roryline)))
-print('Count of unique characters (i.e., features):', len(chars))
+#print('Count of unique characters (i.e., features):', len(chars))
 char_indices = dict((c, i) for i, c in enumerate(chars))
 indices_char = dict((i, c) for i, c in enumerate(chars))
 
 
 ##### create pred_x
-predtext= 'where can i find the best coffee in this'
-maxlen=40
+predtext= input('Give me 40 characters: ')
+maxlen=len(predtext)
 for diversity in [0.2, 0.5, 1.0, 1.2]:
             print('----- diversity:', diversity)
 
