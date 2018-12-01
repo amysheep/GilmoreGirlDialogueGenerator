@@ -14,25 +14,29 @@ with open('./scrape/script.jl') as f:
     for line in f:
         data.append(json.loads(line))
         
-
+rorysubset = [item for item in data if item['actor'] == 'RORY']
 lorelaisubset = [item for item in data if item['actor'] == 'LORELAI']
 
 
-
+rory = pd.DataFrame(rorysubset)
 lorelai = pd.DataFrame(lorelaisubset)
 
+roryline = rory.line
+lorelai = lorelai.line
 
-lorelailine = lorelai.line
+n_messages = len(roryline)
+n_chars = len(' '.join(map(str, roryline)))
 
-n_messages = len(lorelailine)
-n_chars = len(' '.join(map(str, lorelailine)))
+print("rory accounts for {} messages".format(n_messages))
+print("her messages add up to {} characters".format(n_chars))
 
 
+roryline = ' '.join(map(str, roryline)).lower()
 lorelailine = ' '.join(map(str, lorelailine)).lower()
 
 
 
-chars = sorted(list(set(lorelailine)))
+chars = sorted(list(set(roryline)))
 print('Count of unique characters (i.e., features):', len(chars))
 char_indices = dict((c, i) for i, c in enumerate(chars))
 indices_char = dict((i, c) for i, c in enumerate(chars))
@@ -41,9 +45,9 @@ maxlen = 40
 step = 3
 sentences = []
 next_chars = []
-for i in range(0, len(lorelailine) - maxlen, step):
-    sentences.append(lorelailine[i: i + maxlen])
-    next_chars.append(lorelailine[i + maxlen])
+for i in range(0, len(roryline) - maxlen, step):
+    sentences.append(roryline[i: i + maxlen])
+    next_chars.append(roryline[i + maxlen])
 print('Number of sequences:', len(sentences), "\n")
 
 print(sentences[:10], "\n")
@@ -96,12 +100,12 @@ def on_epoch_end(epoch, logs):
         print()
         print('----- Generating text after Epoch: %d' % epoch)
 
-        start_index = random.randint(0, len(lorelailine) - maxlen - 1)
+        start_index = random.randint(0, len(roryline) - maxlen - 1)
         for diversity in [0.2, 0.5, 1.0, 1.2]:
             print('----- diversity:', diversity)
 
             generated = ''
-            sentence = lorelailine[start_index: start_index + maxlen]
+            sentence = roryline[start_index: start_index + maxlen]
             generated += sentence
             print('----- Generating with seed: "' + sentence + '"')
             sys.stdout.write(generated)
@@ -128,7 +132,7 @@ def on_epoch_end(epoch, logs):
 generate_text = LambdaCallback(on_epoch_end=on_epoch_end)
 
 # define the checkpoint
-filepath = "weights_lorelai.hdf5"
+filepath = "weights_rory.hdf5"
 checkpoint = ModelCheckpoint(filepath, 
                              monitor='loss', 
                              verbose=1, 

@@ -13,19 +13,10 @@ import json
 import pandas as pd
 import numpy as np
 import sys
-#save_keras_model(self.model, os.path.join(saving_staging_directory, 'model.hdf5'))
-#model = create_model()
-actor = input("Rory or Lorelai?")
-if actor == 'Rory':
-    model = load_model("weights_rory.hdf5")
-else: model = load_model("weights_lorelai.hdf5")
+
+model = load_model("weights_lorelai.hdf5")
 
 
-
-
-
-
-#from lstmmodel.sample import sample
 def sample(preds, temperature=1.0):
     # helper function to sample an index from a probability array
     preds = np.asarray(preds).astype('float64')
@@ -36,29 +27,23 @@ def sample(preds, temperature=1.0):
     return np.argmax(probas)
 
 
-
 data = []
 with open('./scrape/script.jl') as f:
     for line in f:
         data.append(json.loads(line))
         
-rorysubset = [item for item in data if item['actor'] == 'RORY']
 lorelaisubset = [item for item in data if item['actor'] == 'LORELAI']
-
-
-rory = pd.DataFrame(rorysubset)
 lorelai = pd.DataFrame(lorelaisubset)
+lorelailine = lorelai.line
 
-roryline = rory.line
-
-n_messages = len(roryline)
-n_chars = len(' '.join(map(str, roryline)))
-
+n_messages = len(lorelailine)
+n_chars = len(' '.join(map(str, lorelailine)))
 
 
-roryline = ' '.join(map(str, roryline)).lower()
 
-chars = sorted(list(set(roryline)))
+lorelailine = ' '.join(map(str, lorelailine)).lower()
+
+chars = sorted(list(set(lorelailine)))
 #print('Count of unique characters (i.e., features):', len(chars))
 char_indices = dict((c, i) for i, c in enumerate(chars))
 indices_char = dict((i, c) for i, c in enumerate(chars))
@@ -66,6 +51,7 @@ indices_char = dict((i, c) for i, c in enumerate(chars))
 
 ##### create pred_x
 predtext= input('Give me 40 characters: ')
+predtext=predtext.lower()[0:39]
 maxlen=len(predtext)
 for diversity in [0.2, 0.5, 1.0, 1.2]:
             print('----- diversity:', diversity)
@@ -76,7 +62,7 @@ for diversity in [0.2, 0.5, 1.0, 1.2]:
             print('----- Generating with seed: "' + sentence + '"')
             sys.stdout.write(generated)
 
-            for i in range(400):
+            for i in range(200):
                 x_pred = np.zeros((1, maxlen, len(chars)))
                 for t, char in enumerate(sentence):
                     x_pred[0, t, char_indices[char]] = 1.

@@ -13,16 +13,8 @@ import json
 import pandas as pd
 import numpy as np
 import sys
-#save_keras_model(self.model, os.path.join(saving_staging_directory, 'model.hdf5'))
-#model = create_model()
-actor = input("Rory or Lorelai?")
-if actor == 'Rory':
-    model = load_model("weights_rory.hdf5")
-else: model = load_model("weights_lorelai.hdf5")
 
-
-
-
+model = load_model("weights_rory.hdf5")
 
 
 #from lstmmodel.sample import sample
@@ -36,7 +28,6 @@ def sample(preds, temperature=1.0):
     return np.argmax(probas)
 
 
-
 data = []
 with open('./scrape/script.jl') as f:
     for line in f:
@@ -44,8 +35,6 @@ with open('./scrape/script.jl') as f:
         
 rorysubset = [item for item in data if item['actor'] == 'RORY']
 lorelaisubset = [item for item in data if item['actor'] == 'LORELAI']
-
-
 rory = pd.DataFrame(rorysubset)
 lorelai = pd.DataFrame(lorelaisubset)
 
@@ -66,7 +55,8 @@ indices_char = dict((i, c) for i, c in enumerate(chars))
 
 ##### create pred_x
 predtext= input('Give me 40 characters: ')
-maxlen=len(predtext)
+predtext=predtext.lower()[0:39]
+maxlen=40
 for diversity in [0.2, 0.5, 1.0, 1.2]:
             print('----- diversity:', diversity)
 
