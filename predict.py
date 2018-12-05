@@ -6,29 +6,42 @@ Created on Mon Nov 26 11:07:23 2018
 @author: ayang
 """
 
-
-
-from keras.models import load_model
+import argparse
 import json
-import pandas as pd
-import numpy as np
 import sys
-#save_keras_model(self.model, os.path.join(saving_staging_directory, 'model.hdf5'))
-#model = create_model()
-actor = input("Rory or Lorelai?")
-if actor == 'Rory':
-    model = load_model("weights_rory.hdf5")
-else: model = load_model("weights_lorelai.hdf5")
+
+import keras.models
+import numpy as np
+import pandas as pd
+
+DIVERSITY_SAMPLES = [0.2, 0.5, 1.0, 1.2]
+SEED_LENGTH = 40
+SEED_CHARSET = list('abcdefghijklmnopqrstuvwxyz')
 
 
+def _setup_args():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--role', default='rory', help='Role (Rory or Lorelai)', required=True)
+    parser.add_argument('--seed', default=None, help='Random seed')
+    parser.add_argument('--diversity', nargs='+', default=DIVERSITY_SAMPLES, help='Diversity')
+
+    return parser.parse_args()
 
 
+def _generate_seed():
+    chars = []
+    for _ in range(40):
+       chars.append(np.random.choice(SEED_CHARSET))
+    return ''.join(chars)
 
 
-#from lstmmodel.sample import sample
-def sample(preds, temperature=1.0):
-    # helper function to sample an index from a probability array
+def _sample(preds, temperature=1.0):
+    """
+    helper function to sample an index from a probability array
+    """
     preds = np.asarray(preds).astype('float64')
+    print(preds)
     preds = np.log(preds) / temperature
     exp_preds = np.exp(preds)
     preds = exp_preds / np.sum(exp_preds)
@@ -36,58 +49,71 @@ def sample(preds, temperature=1.0):
     return np.argmax(probas)
 
 
-
-data = []
-with open('./scrape/script.jl') as f:
-    for line in f:
-        data.append(json.loads(line))
-        
-rorysubset = [item for item in data if item['actor'] == 'RORY']
-lorelaisubset = [item for item in data if item['actor'] == 'LORELAI']
+def _load_model(role):
+    model_file = "weights_{}.hdf5".format(role)
+    return keras.models.load_model(model_file)
 
 
-rory = pd.DataFrame(rorysubset)
-lorelai = pd.DataFrame(lorelaisubset)
+def _load_lines(role):
+    data = []
+    with open('./scrape/script.jl') as f:
+        for line in f:
+            data.append(json.loads(line))
 
-roryline = rory.line
+    role_subset = [item for item in data if item['actor'].lower() == role]
+    role_dataframe = pd.DataFrame(role_subset)
 
-n_messages = len(roryline)
-n_chars = len(' '.join(map(str, roryline)))
-
-
-
-roryline = ' '.join(map(str, roryline)).lower()
-
-chars = sorted(list(set(roryline)))
-#print('Count of unique characters (i.e., features):', len(chars))
-char_indices = dict((c, i) for i, c in enumerate(chars))
-indices_char = dict((i, c) for i, c in enumerate(chars))
+    role_line = ' '.join(map(str, role_dataframe.line)).lower()
+    chars = sorted(list(set(role_line)))
+    return chars
 
 
-##### create pred_x
-predtext= input('Give me 40 characters: ')
-maxlen=len(predtext)
-for diversity in [0.2, 0.5, 1.0, 1.2]:
-            print('----- diversity:', diversity)
+def _main():
+    args = _setup_args()
 
-            generated = ''
-            sentence = predtext
-            generated += sentence
-            print('----- Generating with seed: "' + sentence + '"')
-            sys.stdout.write(generated)
+    role = (args.role).lower()
+    if role not in ['rory', 'lorelai']:
+        raise ValueError('Expected Rory or Lorelai')
+    model = _load_model(role)
+    chars = _load_lines(role)
+    char_indices = dict((c, i) for i, c in enumerate(chars))
+    indices_char = dict((i, c) for i, c in enumerate(chars))
 
-            for i in range(400):
-                x_pred = np.zeros((1, maxlen, len(chars)))
-                for t, char in enumerate(sentence):
-                    x_pred[0, t, char_indices[char]] = 1.
+    seed = args.seed or _generate_seed()
+    if len(seed) > SEED_LENGTH:
+        seed = seed[0:SEED_LENGTH]
+    elif len(seed) < SEED_LENGTH:
+        raise ValueError('Seed needs to have {} characters.'.format(SEED_LENGTH))
 
-                preds = model.predict(x_pred, verbose=0)[0]
-                next_index = sample(preds, diversity)
-                next_char = indices_char[next_index]
+    div = [float(value) for value in args.diversity]
 
-                generated += next_char
-                sentence = sentence[1:] + next_char
+    result = {
+        'role': role,
+        'seed': seed,
+        'diversity': div,
+        'result': {}
+    }
 
-                sys.stdout.write(next_char)
-                sys.stdout.flush()
-            print()
+    for diversity in div:
+        generated = ''
+        sentence = seed
+
+        for i in range(400):
+            x_pred = np.zeros((1, SEED_LENGTH, len(chars)))
+            for t, char in enumerate(sentence):
+                x_pred[0, t, char_indices[char]] = 1.
+
+            preds = model.predict(x_pred, verbose=0)[0]
+            next_index = _sample(preds, diversity)
+            next_char = indices_char[next_index]
+
+            generated += next_char
+            sentence = sentence[1:] + next_char
+
+        result['result'][diversity] = generated
+
+    print(json.dumps(result))
+
+
+if __name__ == '__main__':
+    _main()
