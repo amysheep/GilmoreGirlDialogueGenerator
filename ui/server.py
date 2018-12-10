@@ -27,7 +27,7 @@ class StaticHTMLEndpoint(object):
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
 
-    <title>Gilmore Girl Dialogue Generator</title>
+    <title>Gilmore Girls Dialogue Generator</title>
 </head>
 
 <body>
@@ -44,7 +44,7 @@ class StaticHTMLEndpoint(object):
                 <label for="seedInput" class="col-sm-1 col-form-label col-form-label-sm">Seed</label>
                 <div class="col-sm-8">
                     <input id="seedInput" class="form-control form-control-sm" value=""/>
-                    <button id="generateSeedButton" type="button" class="btn btn-secondary btn-sm">Generate random seed</button>
+                    <button id="generateSeedButton" type="button" class="btn btn-secondary btn-sm">Generate random sequence</button>
                 </div>
                 <div>
                     <button id="submit" type="button" class="btn btn-primary btn-sm" disabled>Submit</button>
