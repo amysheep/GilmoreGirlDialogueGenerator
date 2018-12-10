@@ -25,6 +25,7 @@ def _setup_args():
     parser.add_argument('--role', default='rory', help='Role (Rory or Lorelai)', required=True)
     parser.add_argument('--seed', default=None, help='Random seed')
     parser.add_argument('--diversity', nargs='+', default=DIVERSITY_SAMPLES, help='Diversity')
+    parser.add_argument('--output-length', default=400, type=int, help='Output sentence length')
 
     return parser.parse_args()
 
@@ -97,7 +98,7 @@ def _main():
         generated = ''
         sentence = seed
 
-        for i in range(400):
+        for i in range(args.output_length):
             x_pred = np.zeros((1, SEED_LENGTH, len(chars)))
             for t, char in enumerate(sentence):
                 x_pred[0, t, char_indices[char]] = 1.

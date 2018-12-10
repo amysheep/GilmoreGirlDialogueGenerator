@@ -11,7 +11,7 @@ import falcon
 
 
 SERVER_FILE = inspect.getfile(inspect.currentframe())
-SCRIPT_DIR = os.path.dirname(os.path.dirname(SERVER_FILE))
+BASE_DIR = os.path.dirname(os.path.dirname(SERVER_FILE))
 
 
 class StaticHTMLEndpoint(object):
@@ -27,7 +27,7 @@ class StaticHTMLEndpoint(object):
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
 
-    <title>Gilmore Girls Dialogue Generator</title>
+    <title>Gilmore Girl Dialogue Generator</title>
 </head>
 
 <body>
@@ -44,10 +44,14 @@ class StaticHTMLEndpoint(object):
                 <label for="seedInput" class="col-sm-1 col-form-label col-form-label-sm">Seed</label>
                 <div class="col-sm-8">
                     <input id="seedInput" class="form-control form-control-sm" value=""/>
-                    <button id="generateSeedButton" type="button" class="btn btn-secondary btn-sm">Generate random sequence</button>
+                    <button id="generateSeedButton" type="button" class="btn btn-secondary btn-sm">Generate seed</button>
                 </div>
                 <div>
                     <button id="submit" type="button" class="btn btn-primary btn-sm" disabled>Submit</button>
+                </div>
+                <label for="outputLengthInput" class="col-sm-1 col-form-label col-form-label-sm">Output Size</label>
+                <div class="col-sm-3">
+                    <input id="outputLengthInput" class="form-control form-control-sm" value="400"/>
                 </div>
             </div>
         </form>
@@ -159,12 +163,14 @@ document.getElementById("submit").onclick = function() {
 
     var role = document.getElementById("roleSelector").value;
     var seed = document.getElementById("seedInput").value;
+    var outputLength = document.getElementById("outputLengthInput").value;
 
     xhr.open('POST', "generate");
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(JSON.stringify({
         role: role,
-        seed: seed
+        seed: seed,
+        output_length: outputLength
     }));
 };
     </script>
@@ -177,6 +183,23 @@ document.getElementById("submit").onclick = function() {
 """
 
 
+class SeedGenerationEndpoint(object):
+
+    def on_get(self, req, resp):
+        request_body = json.loads(req.stream.read())
+        role = request_body['role']
+        
+        cwd = os.getcwd()
+        try:
+            os.chdir(os.path.join(BASE_DIR, 'scrape'))
+            with open('')
+        except Exception as e:
+            resp.status = 500
+            resp.body = e
+        finally:
+            os.chdir(cwd)
+        
+
 class OutputGenerationEndpoint(object):
 
     def on_post(self, req, resp):
@@ -184,17 +207,20 @@ class OutputGenerationEndpoint(object):
 
         role = request_body['role']
         seed = request_body['seed']
+        output_length = request_body['output_length']
 
         cwd = os.getcwd()
         try:
-            os.chdir(SCRIPT_DIR)
+            os.chdir(BASE_DIR)
             output = subprocess.check_output([
                 "python3",
                 "predict.py",
                 "--role",
                 role,
                 "--seed",
-                seed
+                seed,
+                "--output-length",
+                output_length
             ])
             resp.status = falcon.HTTP_200
             resp.content_type = "application/json"
@@ -210,3 +236,4 @@ class OutputGenerationEndpoint(object):
 app = falcon.API()
 app.add_route('/', StaticHTMLEndpoint())
 app.add_route('/generate', OutputGenerationEndpoint())
+app.add_route('/seed', SeedGenerationEndpoint())
