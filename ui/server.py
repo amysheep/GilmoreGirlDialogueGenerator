@@ -1,10 +1,12 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import collections
 import inspect
 import json
 import os
 import os.path
+import random
 import subprocess
 
 import falcon
@@ -12,6 +14,32 @@ import falcon
 
 SERVER_FILE = inspect.getfile(inspect.currentframe())
 BASE_DIR = os.path.dirname(os.path.dirname(SERVER_FILE))
+
+_SCRIPT_CACHE = collections.defaultdict(str)
+
+def _setup_script_cache():
+    cwd = os.getcwd()
+    os.chdir(os.path.join(BASE_DIR, "scrape"))
+
+    unmerged = collections.defaultdict(list)
+    with open('./script.jl') as stream:
+        for line in stream:
+            data = json.loads(line)
+            actor = data['actor'].lower()
+            line = ''.join(
+                ch
+                for ch in data['line'].lower()
+                if ch.islower()
+            )
+            unmerged[actor].append(line)
+
+    for actor, line in unmerged.items():
+        _SCRIPT_CACHE[actor] = ''.join(line)
+
+    os.chdir(cwd)
+
+
+_setup_script_cache()
 
 
 class StaticHTMLEndpoint(object):
@@ -42,16 +70,16 @@ class StaticHTMLEndpoint(object):
                     </select>
                 </div>
                 <label for="seedInput" class="col-sm-1 col-form-label col-form-label-sm">Seed</label>
-                <div class="col-sm-8">
-                    <input id="seedInput" class="form-control form-control-sm" value=""/>
+                <div class="col-sm-4">
+                    <input id="seedInput" class="form-control form-control-sm w-50" value=""/>
                     <button id="generateSeedButton" type="button" class="btn btn-secondary btn-sm">Generate seed</button>
+                </div>
+                <label for="outputLengthInput" class="col-sm-1 col-form-label col-form-label-sm">Output Size</label>
+                <div class="col-sm-1">
+                    <input id="outputLengthInput" class="form-control form-control-sm w-100" value="400"/>
                 </div>
                 <div>
                     <button id="submit" type="button" class="btn btn-primary btn-sm" disabled>Submit</button>
-                </div>
-                <label for="outputLengthInput" class="col-sm-1 col-form-label col-form-label-sm">Output Size</label>
-                <div class="col-sm-3">
-                    <input id="outputLengthInput" class="form-control form-control-sm" value="400"/>
                 </div>
             </div>
         </form>
@@ -72,19 +100,22 @@ document.querySelector('form').onsubmit = function() {
 };
 
 document.getElementById("generateSeedButton").onclick = function() {
-    var result = "";
-    var possibleCharacters = "abcdefghijklmnopqrstuvwxyz";
+    var xhr = new XMLHttpRequest();
 
-    for (var i = 0; i < 40; ++i) {
-        result += possibleCharacters.charAt(Math.floor(Math.random() * possibleCharacters.length));
-    }
+    xhr.onload = function() {
+        if (xhr.status == 200) {
+            var response = xhr.responseText;
+            var seed = document.getElementById("seedInput")
 
-    var seedInput = document.getElementById("seedInput");
-    seedInput.value = result;
+            seed.value = response;
+            seed.dispatchEvent(new Event('input'));
+        }
+    };
 
-    var onInputEvent = document.createEvent("HTMLEvents");
-    onInputEvent.initEvent("input", false, true);
-    seedInput.dispatchEvent(onInputEvent);
+    var role = document.getElementById("roleSelector").value;
+
+    xhr.open('GET', "seed?role=" + role);
+    xhr.send();
 };
 
 document.getElementById("seedInput").addEventListener(
@@ -178,7 +209,7 @@ document.getElementById("submit").onclick = function() {
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
-</bodY>
+</body>
 </html>
 """
 
@@ -186,18 +217,17 @@ document.getElementById("submit").onclick = function() {
 class SeedGenerationEndpoint(object):
 
     def on_get(self, req, resp):
-        request_body = json.loads(req.stream.read())
-        role = request_body['role']
+        role = req.get_param('role')
         
-        cwd = os.getcwd()
         try:
-            os.chdir(os.path.join(BASE_DIR, 'scrape'))
-            with open('')
+            line = _SCRIPT_CACHE[role]
+            random_start = random.randrange(len(line) - 100)
+            
+            resp.status = falcon.HTTP_200
+            resp.body = line[random_start:random_start + 40]
         except Exception as e:
-            resp.status = 500
-            resp.body = e
-        finally:
-            os.chdir(cwd)
+            resp.status = falcon.HTTP_500
+            resp.body = str(e)
         
 
 class OutputGenerationEndpoint(object):
@@ -211,7 +241,7 @@ class OutputGenerationEndpoint(object):
 
         cwd = os.getcwd()
         try:
-            os.chdir(BASE_DIR)
+            os.chdir(os.path.join(BASE_DIR, 'src'))
             output = subprocess.check_output([
                 "python3",
                 "predict.py",
@@ -226,8 +256,8 @@ class OutputGenerationEndpoint(object):
             resp.content_type = "application/json"
             resp.body = output
         except Exception as e:
-            resp.status = 500
-            resp.body = e
+            resp.status = falcon.HTTP_500
+            resp.body = str(e)
         finally:
             os.chdir(cwd)
 

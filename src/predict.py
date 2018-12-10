@@ -23,18 +23,11 @@ def _setup_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--role', default='rory', help='Role (Rory or Lorelai)', required=True)
-    parser.add_argument('--seed', default=None, help='Random seed')
+    parser.add_argument('--seed', help='Random seed', required=True)
     parser.add_argument('--diversity', nargs='+', default=DIVERSITY_SAMPLES, help='Diversity')
     parser.add_argument('--output-length', default=400, type=int, help='Output sentence length')
 
     return parser.parse_args()
-
-
-def _generate_seed():
-    chars = []
-    for _ in range(40):
-       chars.append(np.random.choice(SEED_CHARSET))
-    return ''.join(chars)
 
 
 def _sample(preds, temperature=1.0):
@@ -56,7 +49,7 @@ def _load_model(role):
 
 def _load_lines(role):
     data = []
-    with open('./scrape/script.jl') as f:
+    with open('../scrape/script.jl') as f:
         for line in f:
             data.append(json.loads(line))
 
@@ -79,7 +72,7 @@ def _main():
     char_indices = dict((c, i) for i, c in enumerate(chars))
     indices_char = dict((i, c) for i, c in enumerate(chars))
 
-    seed = args.seed or _generate_seed()
+    seed = args.seed
     if len(seed) > SEED_LENGTH:
         seed = seed[0:SEED_LENGTH]
     elif len(seed) < SEED_LENGTH:
