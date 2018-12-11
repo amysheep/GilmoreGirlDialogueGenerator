@@ -61,6 +61,24 @@ class StaticHTMLEndpoint(object):
 
     <title>Gilmore Girl Dialogue Generator</title>
 </head>
+<style>
+* {
+  box-sizing: border-box;
+}
+
+.column {
+  float: left;
+  width: 33.33%;
+  padding: 5px;
+}
+
+/* Clearfix (clear floats) */
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+</style>
 
 <body>
     <div class="container mt-5">
@@ -83,21 +101,32 @@ class StaticHTMLEndpoint(object):
                 </div>
                 <label for="outputLengthInput" class="col-sm-2 col-form-label col-form-label-sm w-80">Output Length:</label>
                 <div class="col-sm-1">
-                    <input id="outputLengthInput" class="form-control form-control-sm w-100" value="200"/>
+                    <input id="outputLengthInput" class="form-control form-control-sm w-100" value="300"/>
                 </div>
                 <div>
                     <button id="submit" type="button" class="btn btn-primary btn-sm" disabled>Submit</button>
                 </div>
             </div>
         </form>
-        <img src="img/img1.jpg"/>
+        <div class="row">
+            <div class="column">
+                <img src="img/img1.jpg" alt="" style="width:100%">
+            </div>
+            <div class="column">
+                <img src="img/img2.jpg" alt="" style="width:100%">
+            </div>
+            <div class="column">
+                <img src="img/img6.jpg" alt="" style="width:100%">
+            </div>
+        </div>
         <h4>Follow these steps:</h4>
         <div id="introDiv">
-            <li>Select your favorite Gilmore Girl</li>
-            <li>Input any 40-character long leading sequence/partical sentence </li>
-            <li>Or use the Generate Seq button to generate random sequence </li>
-            <li>Input the output length (default 400 character) </li>
-            <li> Submit and wait for your result </li>
+            <li>Select your favorite Gilmore Girl from the <b>Role</b> dropdown list</li>
+            <li>Input any 40-character long <b>leading sequence/partical sentence</b> </li>
+            <li>Or simply hit the <b>Generate Seq</b> button to generate random sequence </li>
+            <li>Input a number between 100 and 400 for the <b>output length</b> (default 200 character) </li>
+            <li> Hit <b>Submit</b> and wait for your result </li>
+            Note: the leading seed will be displayed before the generated text.
         </div>
 
 
