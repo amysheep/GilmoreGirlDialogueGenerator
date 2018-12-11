@@ -65,12 +65,15 @@ class StaticHTMLEndpoint(object):
                         <option value="lorelai">Lorelai</option>
                     </select>
                 </div>
-                <label for="seedInput" class="col-sm-2 col-form-label col-form-label-sm">Leading Seq Input</label>
-                <div class="col-sm-10">
+                <label for="seedInput" class="col-sm-2 col-form-label col-form-label-sm">Leading Seq Input:</label>
+                <div class="col-sm-2">
                     <input id="seedInput" class="form-control form-control-sm w-70" value=""/>
+
+                </div>
+                <div class="col-sm-2">
                     <button id="generateSeedButton" type="button" class="btn btn-secondary btn-sm">Generate Seq</button>
                 </div>
-                <label for="outputLengthInput" class="col-sm-1 col-form-label col-form-label-sm w-80">Output Length in Character</label>
+                <label for="outputLengthInput" class="col-sm-2 col-form-label col-form-label-sm w-80">Output Length:</label>
                 <div class="col-sm-1">
                     <input id="outputLengthInput" class="form-control form-control-sm w-100" value="200"/>
                 </div>
@@ -79,6 +82,7 @@ class StaticHTMLEndpoint(object):
                 </div>
             </div>
         </form>
+        <img src="img/img1.jpg" alt="">
         <h4>Follow these steps:</h4>
         <div id="introDiv">
             <li>Select your favorite Gilmore Girl</li>
@@ -169,7 +173,7 @@ document.getElementById("submit").onclick = function() {
                 items.push("<li class=\\"list-group-item\\">" +
                             responseJSON.result[diversity] +
                             "  (Diversity: " +
-                            diversity +
+                            diversity + 
                             ")</li>");
             }
 
@@ -201,6 +205,8 @@ document.getElementById("submit").onclick = function() {
         output_length: outputLength
     }));
 };
+
+
     </script>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
