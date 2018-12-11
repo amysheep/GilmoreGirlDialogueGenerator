@@ -38,6 +38,14 @@ def _setup_script_cache():
 _setup_script_cache()
 
 
+class ImageEndpoint(object):
+
+    def on_get(self, req, resp, image_file):
+        with open(os.path.join('img/', image_file), 'rb') as stream:
+            resp.status = falcon.HTTP_200
+            resp.body = stream.read()
+
+
 class StaticHTMLEndpoint(object):
 
     def on_get(self, req, resp):
@@ -82,7 +90,7 @@ class StaticHTMLEndpoint(object):
                 </div>
             </div>
         </form>
-        <img src="img/img1.jpg" alt="">
+        <img src="img/img1.jpg"/>
         <h4>Follow these steps:</h4>
         <div id="introDiv">
             <li>Select your favorite Gilmore Girl</li>
@@ -173,7 +181,7 @@ document.getElementById("submit").onclick = function() {
                 items.push("<li class=\\"list-group-item\\">" +
                             responseJSON.result[diversity] +
                             "  (Diversity: " +
-                            diversity + 
+                            diversity +
                             ")</li>");
             }
 
@@ -270,3 +278,4 @@ app = falcon.API()
 app.add_route('/', StaticHTMLEndpoint())
 app.add_route('/generate', OutputGenerationEndpoint())
 app.add_route('/seed', SeedGenerationEndpoint())
+app.add_route('/img/{image_file}', ImageEndpoint())
