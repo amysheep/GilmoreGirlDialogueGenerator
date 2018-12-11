@@ -250,7 +250,7 @@ class OutputGenerationEndpoint(object):
             ])
             resp.status = falcon.HTTP_200
             resp.content_type = "application/json"
-            resp.body = output
+            resp.body = seed + output
         except Exception as e:
             resp.status = falcon.HTTP_500
             resp.body = str(e)
