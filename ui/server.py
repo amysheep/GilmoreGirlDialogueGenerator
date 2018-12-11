@@ -66,8 +66,8 @@ class StaticHTMLEndpoint(object):
                     </select>
                 </div>
                 <label for="seedInput" class="col-sm-1 col-form-label col-form-label-sm">Seed</label>
-                <div class="col-sm-4">
-                    <input id="seedInput" class="form-control form-control-sm w-50" value=""/>
+                <div class="col-sm-6">
+                    <input id="seedInput" class="form-control form-control-sm w-75" value=""/>
                     <button id="generateSeedButton" type="button" class="btn btn-secondary btn-sm">Generate seed</button>
                 </div>
                 <label for="outputLengthInput" class="col-sm-1 col-form-label col-form-label-sm">Output Size</label>
@@ -250,7 +250,7 @@ class OutputGenerationEndpoint(object):
             ])
             resp.status = falcon.HTTP_200
             resp.content_type = "application/json"
-            resp.body = seed + output
+            resp.body = output
         except Exception as e:
             resp.status = falcon.HTTP_500
             resp.body = str(e)

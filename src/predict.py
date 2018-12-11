@@ -103,7 +103,7 @@ def _main():
             generated += next_char
             sentence = sentence[1:] + next_char
 
-        result['result'][diversity] = generated
+        result['result'][diversity] = seed + generated
 
     print(json.dumps(result))
 
