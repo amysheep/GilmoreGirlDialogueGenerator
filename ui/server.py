@@ -26,11 +26,7 @@ def _setup_script_cache():
         for line in stream:
             data = json.loads(line)
             actor = data['actor'].lower()
-            line = ''.join(
-                ch
-                for ch in data['line'].lower()
-                if ch.islower()
-            )
+            line = data['line'].lower()
             unmerged[actor].append(line)
 
     for actor, line in unmerged.items():
@@ -129,7 +125,7 @@ document.getElementById("seedInput").addEventListener(
 
         for (var i = 0; i < this.value.length; ++i) {
             var char = this.value.charAt(i);
-            if (!(/[a-z]/.test(char))) {
+            if ((/[A-Z]/.test(char))) {
                 problems.push("The seed should only contain lowercase a-z.");
                 break;
             }
@@ -218,17 +214,17 @@ class SeedGenerationEndpoint(object):
 
     def on_get(self, req, resp):
         role = req.get_param('role')
-        
+
         try:
             line = _SCRIPT_CACHE[role]
             random_start = random.randrange(len(line) - 100)
-            
+
             resp.status = falcon.HTTP_200
             resp.body = line[random_start:random_start + 40]
         except Exception as e:
             resp.status = falcon.HTTP_500
             resp.body = str(e)
-        
+
 
 class OutputGenerationEndpoint(object):
 
