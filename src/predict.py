@@ -78,6 +78,8 @@ def _main():
     elif len(seed) < SEED_LENGTH:
         raise ValueError('Seed needs to have {} characters.'.format(SEED_LENGTH))
 
+    seed = seed.lower()
+
     div = [float(value) for value in args.diversity]
 
     result = {
