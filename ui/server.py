@@ -123,14 +123,6 @@ document.getElementById("seedInput").addEventListener(
             problems.push("The seed needs to have exactly 40 characters, got " + this.value.length);
         }
 
-        for (var i = 0; i < this.value.length; ++i) {
-            var char = this.value.charAt(i);
-            if ((/[A-Z]/.test(char))) {
-                problems.push("The seed should only contain lowercase a-z.");
-                break;
-            }
-        }
-
         var submitButton = document.getElementById("submit");
         var messageDiv = document.getElementById("messageDiv");
         if (problems.length === 0) {
