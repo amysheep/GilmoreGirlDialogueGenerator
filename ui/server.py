@@ -65,23 +65,32 @@ class StaticHTMLEndpoint(object):
                         <option value="lorelai">Lorelai</option>
                     </select>
                 </div>
-                <label for="seedInput" class="col-sm-1 col-form-label col-form-label-sm">Seed</label>
-                <div class="col-sm-6">
-                    <input id="seedInput" class="form-control form-control-sm w-75" value=""/>
-                    <button id="generateSeedButton" type="button" class="btn btn-secondary btn-sm">Generate seed</button>
+                <label for="seedInput" class="col-sm-2 col-form-label col-form-label-sm">Leading Seq Input</label>
+                <div class="col-sm-10">
+                    <input id="seedInput" class="form-control form-control-sm w-70" value=""/>
+                    <button id="generateSeedButton" type="button" class="btn btn-secondary btn-sm">Generate Seq</button>
                 </div>
-                <label for="outputLengthInput" class="col-sm-1 col-form-label col-form-label-sm">Output Size</label>
+                <label for="outputLengthInput" class="col-sm-1 col-form-label col-form-label-sm w-80">Output Length in Character</label>
                 <div class="col-sm-1">
-                    <input id="outputLengthInput" class="form-control form-control-sm w-100" value="400"/>
+                    <input id="outputLengthInput" class="form-control form-control-sm w-100" value="200"/>
                 </div>
                 <div>
                     <button id="submit" type="button" class="btn btn-primary btn-sm" disabled>Submit</button>
                 </div>
             </div>
         </form>
+        <h4>Follow these steps:</h4>
+        <div id="introDiv">
+            <li>Select your favorite Gilmore Girl</li>
+            <li>Input any 40-character long leading sequence/partical sentence </li>
+            <li>Or use the Generate Seq button to generate random sequence </li>
+            <li>Input the output length (default 400 character) </li>
+            <li> Submit and wait for your result </li>
+        </div>
+
 
         <div id="messageDiv" class="alert alert-primary" role="alert">
-            Hello!
+            Are you ready?
         </div>
 
         <div id="resultContainer">
